@@ -122,10 +122,6 @@ func starts(params *gosnmp.GoSNMP, config *Config) {
 				if strings.Contains(walkErr.Error(), "request timeout (after") {
 
 					toExport["upsESystemStatus"] = 10 //shutdown
-					toExport["upsESystemOutputVoltage"] = 0
-					toExport["upsESystemOutputFrequency"] = 0
-					toExport["upsESystemOutputLoad"] = 0
-					toExport["upsEBatteryEstimatedChargeRemaining"] = 0
 					toExport["upsEBatteryStatus"] = 4 //batteryDepleted
 
 					go PushData(toExport, tm)

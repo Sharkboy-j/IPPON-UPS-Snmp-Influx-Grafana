@@ -136,7 +136,7 @@ func starts(params *gosnmp.GoSNMP, config *Config) {
 				}
 
 				log.Printf("Ошибка выполнения SNMP-запроса для %s: %v", oid.OID, walkErr)
-				continue
+				break
 			}
 
 			for _, variable := range variables {

@@ -12,6 +12,10 @@ kill:
 start:
 	sudo docker-compose up -d
 
+.PHONY: logs
+logs:
+	sudo docker logs -f --tail 10 ippon
+
 .PHONY: build
 build:
 	@$(MAKE) pull
@@ -22,4 +26,4 @@ build:
 	sudo docker rm ippon
 	sudo docker build -t ippon --no-cache .
 	sudo docker-compose up -d
-	sudo docker logs ippon
+	sudo docker logs -f --tail 10 ippon

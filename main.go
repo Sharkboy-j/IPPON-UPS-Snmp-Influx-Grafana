@@ -104,21 +104,38 @@ func main() {
 func starts(params *gosnmp.GoSNMP, config *Config) {
 	oidMap, err := parseAndReverseYAML("./mibs/EPPC-MIB.yaml")
 	if err != nil {
-		fmt.Errorf(err.Error())
+		fmt.Println(err.Error())
 	}
 
 	fmt.Println("MIB map parsed")
 
 	for {
-		toExport := make(map[string]any)
 		tm := time.Now()
+		toExport := make(map[string]any)
 
 		for _, oid := range config.OIDs {
-			variables, err := params.WalkAll(oid.OID)
+
+			variables, walkErr := params.WalkAll(oid.OID)
 			tm = time.Now()
 
-			if err != nil {
-				log.Printf("Ошибка выполнения SNMP-запроса для %s: %v", oid.OID, err)
+			if walkErr != nil {
+				if strings.Contains(walkErr.Error(), "request timeout (after") {
+
+					toExport["upsESystemStatus"] = 10 //shutdown
+					toExport["upsESystemOutputVoltage"] = 0
+					toExport["upsESystemOutputFrequency"] = 0
+					toExport["upsESystemOutputLoad"] = 0
+					toExport["upsEBatteryEstimatedChargeRemaining"] = 0
+					toExport["upsEBatteryStatus"] = 4 //batteryDepleted
+
+					go PushData(toExport, tm)
+
+					time.Sleep(time.Second * time.Duration(config.SNMP.Repeat))
+
+					break
+				}
+
+				log.Printf("Ошибка выполнения SNMP-запроса для %s: %v", oid.OID, walkErr)
 				continue
 			}
 
@@ -180,9 +197,14 @@ func PushData(data map[string]any, tm time.Time) {
 		p.AddField(key, value)
 	}
 
+	if len(p.FieldList()) == 0 {
+		return
+	}
+
 	if err := writeAPI.WritePoint(context.Background(), p); err != nil {
 		log.Printf("Error writing point to InfluxDB: %v", err)
 	}
+
 }
 
 func parseAndReverseYAML(filePath string) (map[string]string, error) {

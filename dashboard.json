@@ -118,7 +118,7 @@
                 "5": {
                   "color": "yellow",
                   "index": 4,
-                  "text": "Battery"
+                  "text": "On Battery"
                 },
                 "6": {
                   "color": "yellow",
@@ -546,7 +546,7 @@
             }
           ],
           "max": 41.2,
-          "min": 0,
+          "min": 31.5,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -556,11 +556,11 @@
               },
               {
                 "color": "rgba(237, 129, 40, 0.89)",
-                "value": 36
+                "value": 34
               },
               {
                 "color": "#299c46",
-                "value": 40
+                "value": 37
               }
             ]
           },
@@ -1387,6 +1387,151 @@
       ],
       "title": "IPPON UPS",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "ddp38pe3t92wwc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": true,
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "upsESystemTemperature"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "UPS Temp"
+              },
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 10,
+        "x": 0,
+        "y": 20
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": false
+        },
+        "tooltip": {
+          "maxHeight": 600,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "alias": "UPS Load",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "ddp38pe3t92wwc"
+          },
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "synoSystem",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"ups\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"ups_data\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"upsESystemTemperature\" ) \r\n  |> map(fn: (r) => ({\r\n      _time: r._time,\r\n      _value: \r\n        if r[\"_field\"] == \"upsESystemTemperature\" then float(v: r._value) / 10.0 \r\n        else float(v: r._value),\r\n      _field: r._field,\r\n      _measurement: r._measurement\r\n  }))\r\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\r\n  |> yield(name: \"mean\")\r\n",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "upsLoad"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "IPPON Temp",
+      "type": "timeseries"
     }
   ],
   "refresh": "5s",
@@ -1396,7 +1541,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timeRangeUpdatedDuringEditOrView": false,
@@ -1404,6 +1549,6 @@
   "timezone": "browser",
   "title": "UPS",
   "uid": "be5qevsfuwc8we",
-  "version": 32,
+  "version": 35,
   "weekStart": ""
 }

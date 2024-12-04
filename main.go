@@ -34,6 +34,9 @@ type Config struct {
 	OIDs []struct {
 		OID string `yaml:"oid"`
 	} `yaml:"oids"`
+	Tnies []struct {
+		Tnie string `yaml:"tne"`
+	} `yaml:"toNullIfEmpty"`
 }
 
 func loadConfig(filename string) (*Config, error) {
@@ -179,8 +182,12 @@ func starts(params *gosnmp.GoSNMP, config *Config) {
 
 		}
 
-		if toExport["upsESystemInputVoltage"].(int64) <= 0 {
-			delete(toExport, "upsESystemInputVoltage")
+		for _, v := range config.Tnies {
+			if mapVal, ok := toExport[v.Tnie]; ok {
+				if mapVal.(int64) <= 0 {
+					delete(toExport, v.Tnie)
+				}
+			}
 		}
 
 		go PushData(toExport, tm)

@@ -13,6 +13,6 @@ oids:
   - oid: "1.3.6.1.4.1.935.10.1.1.2"    # upsESystemSummary
   - oid: "1.3.6.1.4.1.935.10.1.1.3"    # upsEBatterySystem
 
-toNullIfEmpty: #only for int
+toNullIfBelowZero: #only for numbers
   - tne: "upsESystemInputVoltage"
   - tne: "upsESystemOutputLoad"

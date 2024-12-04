@@ -36,7 +36,7 @@ type Config struct {
 	} `yaml:"oids"`
 	Tnies []struct {
 		Tnie string `yaml:"tne"`
-	} `yaml:"toNullIfEmpty"`
+	} `yaml:"toNullIfBelowZero"`
 }
 
 func loadConfig(filename string) (*Config, error) {

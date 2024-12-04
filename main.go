@@ -179,6 +179,10 @@ func starts(params *gosnmp.GoSNMP, config *Config) {
 
 		}
 
+		if toExport["upsESystemInputVoltage"].(int64) <= 0 {
+			delete(toExport, "upsESystemInputVoltage")
+		}
+
 		go PushData(toExport, tm)
 
 		time.Sleep(time.Second * time.Duration(config.SNMP.Repeat))

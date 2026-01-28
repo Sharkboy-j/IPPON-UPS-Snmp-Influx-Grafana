@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clean Go caches (self-hosted)
+        run: |
+          rm -rf "$HOME/go/pkg/mod"
+          rm -rf "$HOME/.cache/go-build"
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod

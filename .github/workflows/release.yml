@@ -5,15 +5,17 @@ on:
     tags:
       - '*'
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ippon-ups-snmp-influx-grafana
 
 jobs:
   docker-build-push:
-    permissions:
-      contents: read
-      packages: write
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
@@ -53,6 +55,7 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
+          provenance: false
           tags: |
             ${{ env.REGISTRY }}/${{ steps.owner.outputs.owner }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
             ${{ env.REGISTRY }}/${{ steps.owner.outputs.owner }}/${{ env.IMAGE_NAME }}:latest
